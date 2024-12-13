@@ -28,7 +28,7 @@ Find us at:
 
 # [linuxserver/jackett](https://github.com/linuxserver/docker-jackett)
 
-[![Scarf.io pulls](https://scarf.sh/installs-badge/linuxserver-ci/linuxserver%2Fjackett?color=94398d&label-color=555555&logo-color=ffffff&style=for-the-badge&package-type=docker)](https://scarf.sh/gateway/linuxserver-ci/docker/linuxserver%2Fjackett)
+[![Scarf.io pulls](https://scarf.sh/installs-badge/linuxserver-ci/linuxserver%2Fjackett?color=94398d&label-color=555555&logo-color=ffffff&style=for-the-badge&package-type=docker)](https://scarf.sh)
 [![GitHub Stars](https://img.shields.io/github/stars/linuxserver/docker-jackett.svg?color=94398d&labelColor=555555&logoColor=ffffff&style=for-the-badge&logo=github)](https://github.com/linuxserver/docker-jackett)
 [![GitHub Release](https://img.shields.io/github/release/linuxserver/docker-jackett.svg?color=94398d&labelColor=555555&logoColor=ffffff&style=for-the-badge&logo=github)](https://github.com/linuxserver/docker-jackett/releases)
 [![GitHub Package Repository](https://img.shields.io/static/v1.svg?color=94398d&labelColor=555555&logoColor=ffffff&style=for-the-badge&label=linuxserver.io&message=GitHub%20Package&logo=github)](https://github.com/linuxserver/docker-jackett/packages)
@@ -62,9 +62,20 @@ The architectures supported by this image are:
 The web interface is at `<your-ip>:9117` , configure various trackers and connections to other apps there.
 More info at [Jackett](https://github.com/Jackett/Jackett).
 
+## Read-Only Operation
+
+This image can be run with a read-only container filesystem. For details please [read the docs](https://docs.linuxserver.io/misc/read-only/).
+
+### Caveats
+
+`AUTO_UPDATE` will not be available.
+
 ## Usage
 
 To help you get started creating a container from this image you can either use docker-compose or the docker cli.
+
+>[!NOTE]
+>Unless a parameter is flaged as 'optional', it is *mandatory* and a value must be provided.
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
 
@@ -81,7 +92,7 @@ services:
       - AUTO_UPDATE=true #optional
       - RUN_OPTS= #optional
     volumes:
-      - /path/to/data:/config
+      - /path/to/jackett/data:/config
       - /path/to/blackhole:/downloads
     ports:
       - 9117:9117
@@ -99,7 +110,7 @@ docker run -d \
   -e AUTO_UPDATE=true `#optional` \
   -e RUN_OPTS= `#optional` \
   -p 9117:9117 \
-  -v /path/to/data:/config \
+  -v /path/to/jackett/data:/config \
   -v /path/to/blackhole:/downloads \
   --restart unless-stopped \
   lscr.io/linuxserver/jackett:latest
@@ -111,7 +122,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 | Parameter | Function |
 | :----: | --- |
-| `-p 9117` | WebUI |
+| `-p 9117:9117` | WebUI |
 | `-e PUID=1000` | for UserID - see below for explanation |
 | `-e PGID=1000` | for GroupID - see below for explanation |
 | `-e TZ=Etc/UTC` | specify a timezone to use, see this [list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List). |
@@ -119,6 +130,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 | `-e RUN_OPTS=` | Optionally specify additional arguments to be passed. |
 | `-v /config` | Where Jackett should store its config file. |
 | `-v /downloads` | Path to torrent blackhole. |
+| `--read-only=true` | Run container with a read-only filesystem. Please [read the docs](https://docs.linuxserver.io/misc/read-only/). |
 
 ## Environment variables from files (Docker secrets)
 
@@ -256,7 +268,8 @@ Below are the instructions for updating containers:
 
 ### Image Update Notifications - Diun (Docker Image Update Notifier)
 
-**tip**: We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.
+>[!TIP]
+>We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.
 
 ## Building locally
 
@@ -271,16 +284,17 @@ docker build \
   -t lscr.io/linuxserver/jackett:latest .
 ```
 
-The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`
+The ARM variants can be built on x86_64 hardware and vice versa using `lscr.io/linuxserver/qemu-static`
 
 ```bash
-docker run --rm --privileged multiarch/qemu-user-static:register --reset
+docker run --rm --privileged lscr.io/linuxserver/qemu-static --reset
 ```
 
 Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64`.
 
 ## Versions
 
+* **31.05.24:** - Rebase to Alpine 3.20.
 * **11.03.24:** - Rebase to Alpine 3.19. Deprecate development tag as upstream is publishing nightly stable releases.
 * **11.07.23:** - Rebase to Alpine 3.18.
 * **01.07.23:** - Deprecate armhf. As announced [here](https://www.linuxserver.io/blog/a-farewell-to-arm-hf)

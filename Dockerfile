@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM alpine:3.19
+FROM alpine:3.20
 
 # set version label
 ARG BUILD_DATE
@@ -11,7 +11,8 @@ LABEL maintainer="lggomez"
 
 #Â environment settings
 ENV XDG_DATA_HOME="/config" \
-XDG_CONFIG_HOME="/config"
+  XDG_CONFIG_HOME="/config" \
+  TMPDIR=/run/jackett-temp
 
 RUN \
   echo "**** install packages ****" && \
@@ -37,6 +38,7 @@ RUN \
   chown -R root:root /app/Jackett && \
   echo "**** save docker image version ****" && \
   echo "${VERSION}" > /etc/docker-image && \
+  printf "Linuxserver.io version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version && \
   echo "**** cleanup ****" && \
   rm -rf \
     /tmp/*
@@ -46,6 +48,7 @@ COPY root/ /
 
 # ports and volumes
 VOLUME /config
+
 EXPOSE 9117
 
 ENTRYPOINT ./app/Jackett/jackett_launcher.sh && bash
