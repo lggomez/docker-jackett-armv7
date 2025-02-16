@@ -6,6 +6,7 @@ project_url: "https://github.com/Jackett/Jackett"
 project_logo: "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/jackett-banner.png"
 project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) works as a proxy server: it translates queries from apps (Sonarr, SickRage, CouchPotato, Mylar, etc) into tracker-site-specific http queries, parses the html response, then sends results back to the requesting software. This allows for getting recent uploads (like RSS) and performing searches. Jackett is a single repository of maintained indexer scraping & translation logic - removing the burden from other apps."
 project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_name }}"
+project_categories: "Indexers"
 # supported architectures
 available_architectures:
   - {arch: "{{ arch_x86_64 }}", tag: "amd64-latest"}
@@ -23,11 +24,14 @@ param_ports:
 # optional container parameters
 opt_param_usage_include_env: true
 opt_param_env_vars:
-  - {env_var: "AUTO_UPDATE", env_value: "true", desc: "Allow Jackett to update inside of the container (currently recommended by Jackett and enabled by default)"}
+  - {env_var: "AUTO_UPDATE", env_value: "true", desc: "Allow Jackett to update inside of the container."}
   - {env_var: "RUN_OPTS", env_value: "", desc: "Optionally specify additional arguments to be passed."}
 readonly_supported: true
 readonly_message: |
-  `AUTO_UPDATE` will not be available.
+  * `AUTO_UPDATE` will not be available.
+nonroot_supported: true
+nonroot_message: |
+  * `AUTO_UPDATE` will not be available.
 # application setup block
 app_setup_block_enabled: true
 app_setup_block: |
@@ -50,34 +54,31 @@ init_diagram: |
     init-migrations -> init-adduser
     init-os-end -> init-config
     init-config -> init-config-end
+    init-crontab-config -> init-config-end
     init-jackett-config -> init-config-end
-    init-os-end -> init-crontab-config
+    init-config -> init-crontab-config
     init-mods-end -> init-custom-files
     base -> init-envfile
     init-config -> init-jackett-config
     base -> init-migrations
-    base -> init-mods
     init-config-end -> init-mods
-    init-mods -> init-mods-end
     init-mods-package-install -> init-mods-end
     init-mods -> init-mods-package-install
-    base -> init-os-end
     init-adduser -> init-os-end
     init-envfile -> init-os-end
-    init-migrations -> init-os-end
     init-custom-files -> init-services
-    init-mods-end -> init-services
     init-services -> svc-cron
     svc-cron -> legacy-services
     init-services -> svc-jackett
     svc-jackett -> legacy-services
   }
   Base Images: {
-    "baseimage-alpine:3.20"
+    "baseimage-alpine:3.21"
   }
   "jackett:latest" <- Base Images
 # changelog
 changelogs:
+  - {date: "12.01.25:", desc: "Rebase to Alpine 3.21."}
   - {date: "31.05.24:", desc: "Rebase to Alpine 3.20."}
   - {date: "11.03.24:", desc: "Rebase to Alpine 3.19. Deprecate development tag as upstream is publishing nightly stable releases."}
   - {date: "11.07.23:", desc: "Rebase to Alpine 3.18."}
